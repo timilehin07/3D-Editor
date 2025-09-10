@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import { Hotspot } from '../types/Hotspot';
@@ -10,11 +10,13 @@ interface HotspotMarkerProps {
 
 export const HotspotMarker: React.FC<HotspotMarkerProps> = ({ hotspot }) => {
   const meshRef = useRef<THREE.Mesh>(null);
-  const [hovered, setHovered] = React.useState(false);
+  const [hovered, setHovered] = useState(false);
 
+  // Add pulsing effect on scale (instead of moving the hotspot away)
   useFrame(({ clock }) => {
     if (meshRef.current) {
-      meshRef.current.position.y = hotspot.position[1] + Math.sin(clock.elapsedTime * 2) * 0.1;
+      const pulse = 1 + Math.sin(clock.elapsedTime * 2) * 0.1;
+      meshRef.current.scale.set(pulse, pulse, pulse);
     }
   });
 
@@ -24,16 +26,15 @@ export const HotspotMarker: React.FC<HotspotMarkerProps> = ({ hotspot }) => {
         ref={meshRef}
         onPointerEnter={() => setHovered(true)}
         onPointerLeave={() => setHovered(false)}
-        scale={hovered ? 1.2 : 1}
       >
         <sphereGeometry args={[0.1, 16, 16]} />
-        <meshStandardMaterial 
-          color={hovered ? "#60A5FA" : "#3B82F6"} 
+        <meshStandardMaterial
+          color={hovered ? "#60A5FA" : "#3B82F6"}
           emissive={hovered ? "#1E40AF" : "#1D4ED8"}
-          emissiveIntensity={0.3}
+          emissiveIntensity={0.5}
         />
       </mesh>
-      
+
       {hovered && (
         <Html
           position={[0, 0.3, 0]}
